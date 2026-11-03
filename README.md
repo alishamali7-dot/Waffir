@@ -58,7 +58,8 @@ with an optional Supabase sync layer.
 | [`templates.ts`](templates.ts) | بذور الإعداد: الأوضاع الماليّة والعملات والفئات |
 | [`DashboardScreen.tsx`](DashboardScreen.tsx) | شاشة الرئيسية مع RTL |
 | [`i18n/`](i18n) | النصوص العربية والإنجليزية، والعدد والمعدود، و[تقرير التدقيق](i18n/ARABIC-REVIEW.md) |
-| [`sync/`](sync) | منطق المزامنة |
+| [`sync/`](sync) | المزامنة: المنطق والتنظيم ومحوّل Supabase |
+| [`db/`](db) | SQLite المحلّي — مصدر الحقيقة |
 | [`supabase/`](supabase) | السكيما والمايقريشنات والأنواع المولَّدة |
 | [`INTEGRATION.md`](INTEGRATION.md) | مرجع: لماذا لا يوجد أيّ تكامل ماليّ |
 
@@ -67,7 +68,7 @@ with an optional Supabase sync layer.
 بلا أيّ مكتبة اختبار — `node --test` وحده.
 
 ```bash
-npx tsx --test quickEntry.test.ts sync/plan.test.ts i18n/i18n.test.ts
+npx tsx --test quickEntry.test.ts i18n/i18n.test.ts sync/plan.test.ts sync/sync.test.ts
 ```
 
 ```bash
@@ -93,10 +94,8 @@ cp .env.example .env.local
 | قاعدة البيانات | ✅ مطبَّقة ومختبَرة |
 | نماذج البيانات وحساب الميزانية | ✅ |
 | تحليل الإدخال السريع | ✅ ١١ اختبارًا |
-| منطق المزامنة | ✅ ٢٠ اختبارًا |
-| تخزين SQLite المحلّي و`sync.ts` | ⬜ |
+| المزامنة offline-first | ✅ ٤٠ اختبارًا |
 | نصوص اللغتين و`t()` والتنسيق | ✅ ٢٩ اختبارًا |
-
 | مشروع Expo وبقيّة الشاشات | ⬜ |
 
-تصميم الشاشات (٢٠ شاشة) في Artifact منفصل على claude.ai.
+تصميم الشاشات (٢١ شاشة، منها اثنتان بالإنجليزية) في Artifact منفصل على claude.ai.
