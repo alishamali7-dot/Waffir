@@ -164,8 +164,19 @@ export function plural(
   digits = lang === 'ar',
 ): string {
   const table = lang === 'ar' ? AR_PLURALS : EN_PLURALS;
-  const category = lang === 'ar' ? arabicCategory(n) : englishCategory(n);
   const forms = table[kind];
+
+  /**
+   * الصفر يُقدَّم على التصنيف.
+   *
+   * CLDR للإنجليزية تعرف صيغتين فقط (one/other)، فالصفر يقع في other
+   * ويخرج «0 entries» — صحيح نحويًّا وركيك في الواجهة. فمتى أعلنت
+   * القائمة صيغة `zero` استعملناها في اللغتين: «No entries» و«لا توجد
+   * عمليات». هذا اختيار واجهة فوق القاعدة، لا مخالفة لها.
+   */
+  if (Math.trunc(n) === 0 && forms.zero) return forms.zero;
+
+  const category = lang === 'ar' ? arabicCategory(n) : englishCategory(n);
   const template = forms[category] ?? forms.other;
   const shown = digits ? toArabicDigits(n) : String(Math.trunc(n));
   return template.replace('{n}', shown);

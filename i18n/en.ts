@@ -11,15 +11,9 @@
 
 import type { Strings } from './ar';
 
-// DeepWritable because `ar` is `as const` (readonly) while a translation
-// is an ordinary object. Structure must still match exactly.
-type Mutable<T> = T extends readonly (infer U)[]
-  ? Mutable<U>[]
-  : T extends object
-    ? { -readonly [K in keyof T]: Mutable<T[K]> }
-    : T;
-
-export const en: Mutable<Strings> = {
+// Typed against the Arabic shape: a missing or extra key is a compile
+// error. Values are free — only the structure has to match.
+export const en: Strings = {
   app: {
     name: 'Mwaffir',
     tagline: 'Your budget, in your pocket',

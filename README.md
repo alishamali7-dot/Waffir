@@ -57,7 +57,7 @@ with an optional Supabase sync layer.
 | [`quickEntry.ts`](quickEntry.ts) | تحليل الإدخال النصيّ («قهوة ١.٥») والتعلّم من التصحيح |
 | [`templates.ts`](templates.ts) | بذور الإعداد: الأوضاع الماليّة والعملات والفئات |
 | [`DashboardScreen.tsx`](DashboardScreen.tsx) | شاشة الرئيسية مع RTL |
-| [`i18n/`](i18n) | النصوص العربية والإنجليزية، والعدد والمعدود |
+| [`i18n/`](i18n) | النصوص العربية والإنجليزية، والعدد والمعدود، و[تقرير التدقيق](i18n/ARABIC-REVIEW.md) |
 | [`sync/`](sync) | منطق المزامنة |
 | [`supabase/`](supabase) | السكيما والمايقريشنات والأنواع المولَّدة |
 | [`INTEGRATION.md`](INTEGRATION.md) | مرجع: لماذا لا يوجد أيّ تكامل ماليّ |
@@ -67,7 +67,7 @@ with an optional Supabase sync layer.
 بلا أيّ مكتبة اختبار — `node --test` وحده.
 
 ```bash
-npx tsx --test quickEntry.test.ts sync/plan.test.ts
+npx tsx --test quickEntry.test.ts sync/plan.test.ts i18n/i18n.test.ts
 ```
 
 ```bash
@@ -95,8 +95,8 @@ cp .env.example .env.local
 | تحليل الإدخال السريع | ✅ ١١ اختبارًا |
 | منطق المزامنة | ✅ ٢٠ اختبارًا |
 | تخزين SQLite المحلّي و`sync.ts` | ⬜ |
-| نصوص اللغتين | ✅ |
-| `t()` وتبديل اللغة | ⬜ |
+| نصوص اللغتين و`t()` والتنسيق | ✅ ٢٩ اختبارًا |
+
 | مشروع Expo وبقيّة الشاشات | ⬜ |
 
 تصميم الشاشات (٢٠ شاشة) في Artifact منفصل على claude.ai.
