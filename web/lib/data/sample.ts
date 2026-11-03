@@ -8,10 +8,29 @@
  */
 
 import { seedState } from '@shared/templates';
-import { toFils, type AppState, type Transaction } from '@shared/types';
+import { toFils, type AppState, type Attachment, type Transaction } from '@shared/types';
 import { monthKeyOf } from '@shared/budget';
 
 import type { DataSource } from './source';
+
+/**
+ * فاتورة حقيقية مرفقة بإحدى العمليات.
+ *
+ * `_localUri` لا `storagePath`: هذا الحقل موجود أصلًا للملفّ الذي
+ * يقرأه الجهاز قبل أن يُرفع، وهو بالضبط حال ملفّ في `public/`. فلا
+ * نحتاج حيلة للعيّنة — نستعمل المسار الذي صُمّم لهذه الحالة.
+ */
+const SAMPLE_RECEIPT: Attachment = {
+  id: 'sample-receipt-1',
+  transactionId: 'sample-tx-5',
+  kind: 'image',
+  storagePath: 'samples/receipt-rusty-anchor.jpg',
+  mimeType: 'image/jpeg',
+  byteSize: 94900,
+  width: 1400,
+  height: 781,
+  _localUri: '/samples/receipt-rusty-anchor.jpg',
+};
 
 const SAMPLE_INCOME = 1250;
 const USER = 'sample-user';
@@ -77,6 +96,7 @@ export class SampleSource implements DataSource {
         amount: toFils(amounts[c.id] ?? 0, mu),
       })),
       transactions: buildTransactions(month, mu),
+      attachments: [SAMPLE_RECEIPT],
     };
   }
 }

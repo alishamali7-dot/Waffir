@@ -75,6 +75,9 @@ export class SupabaseSource implements DataSource {
       goals: goals.map(toGoal),
       deposits: [],
       transactions: txs.map(toTransaction),
+      // المرفقات تُحمَّل عند فتح العملية لا مع اللوحة: صفّها صغير
+      // لكن عددها ينمو بعدد الفواتير، ولا تُعرض في لوحة البيانات.
+      attachments: [],
       alertRules: {
         categoryWarnAt: Number(profile?.category_warn_at ?? 0.85),
         duplicateSubscriptions: Boolean(profile?.alert_duplicate_subscriptions ?? true),

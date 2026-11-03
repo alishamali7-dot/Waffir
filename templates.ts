@@ -310,6 +310,7 @@ export function seedState(
     ...parts,
     deposits: [],
     transactions: [],
+    attachments: [],
     alertRules: {
       categoryWarnAt: 0.85,
       duplicateSubscriptions: true,

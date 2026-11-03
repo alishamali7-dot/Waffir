@@ -4,7 +4,19 @@ import { getLocale } from '@/lib/lang';
 
 import { monthKeyOf } from '@shared/budget';
 import { count, formatMoney, formatMonthKey } from '@shared/i18n';
-import type { Transaction } from '@shared/types';
+import type { Attachment, Transaction } from '@shared/types';
+
+/**
+ * من أين تُعرض الفاتورة.
+ *
+ * `_localUri` أوّلًا: الملفّ على الجهاز يُعرض فورًا، سواء لم يُرفع
+ * بعد أو كان أصلًا ملفًّا محلّيًّا كحال العيّنة. وإلّا من الـbucket —
+ * وهو خاصّ، فالرابط يحتاج توقيعًا، ولذلك يُولَّد على السيرفر لا هنا.
+ */
+function receiptSrc(a: Attachment): string | null {
+  if (a._localUri) return a._localUri;
+  return null; // رابط موقَّع — يُضاف مع المصادقة
+}
 
 /** عمليات اليوم الواحد مجمّعة، أحدث يوم أوّلًا. */
 function groupByDay(txs: Transaction[]) {
@@ -26,6 +38,14 @@ export default async function TransactionsPage() {
   const month = monthKeyOf(new Date());
   const catById = new Map(state.categories.map((c) => [c.id, c]));
   const accById = new Map(state.accounts.map((a) => [a.id, a]));
+
+  // فواتير كلّ عملية
+  const receiptsByTx = new Map<string, Attachment[]>();
+  for (const a of state.attachments) {
+    const list = receiptsByTx.get(a.transactionId);
+    if (list) list.push(a);
+    else receiptsByTx.set(a.transactionId, [a]);
+  }
 
   const txs = state.transactions
     .filter((t) => t.occurredAt.startsWith(month))
@@ -109,6 +129,9 @@ export default async function TransactionsPage() {
                   const cat = t.categoryId ? catById.get(t.categoryId) : undefined;
                   const acc = accById.get(t.accountId);
                   const income = t.direction === 'credit';
+                  const receipts = receiptsByTx.get(t.id) ?? [];
+                  const thumb = receipts.map(receiptSrc).find(Boolean) ?? null;
+
                   return (
                     <div key={t.id} className="row">
                       <span
@@ -123,6 +146,36 @@ export default async function TransactionsPage() {
                           {acc ? ` · ${acc.name}` : ''}
                         </span>
                       </span>
+
+                      {thumb && (
+                        <a
+                          href={thumb}
+                          target="_blank"
+                          rel="noreferrer"
+                          // بديل وصفيّ لا «صورة»: قارئ الشاشة يحتاج
+                          // أن يعرف فاتورة ماذا، لا أنّ هنا صورة.
+                          aria-label={`${s.add.photo}: ${t.description}`}
+                          style={{
+                            flex: '0 0 auto',
+                            width: 40,
+                            height: 40,
+                            borderRadius: 10,
+                            overflow: 'hidden',
+                            border: '1px solid var(--line)',
+                            display: 'block',
+                          }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={thumb}
+                            alt=""
+                            width={40}
+                            height={40}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        </a>
+                      )}
+
                       <span
                         className="row-figure num"
                         style={{ color: income ? 'var(--good)' : 'var(--ink)' }}

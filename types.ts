@@ -326,6 +326,53 @@ export interface Alert {
   dismissedAt?: string;
 }
 
+// ─── مرفقات الفواتير ─────────────────────────────────────────────────
+
+export type AttachmentKind = 'image' | 'pdf';
+
+export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024;
+
+export const ALLOWED_ATTACHMENT_MIME = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/heic',
+  'application/pdf',
+] as const;
+
+export type AttachmentMime = (typeof ALLOWED_ATTACHMENT_MIME)[number];
+
+/**
+ * صورة فاتورة أو ملفّ PDF يرفقه المستخدم بعملية.
+ *
+ * ليس استيرادًا: الملفّ يختاره المستخدم بيده ولا يُقرأ محتواه. الـPDF
+ * يُخزَّن ويُعرض، ولا يُستخرج منه رقم (راجع INTEGRATION.md).
+ */
+export interface Attachment {
+  id: string;
+  transactionId: string;
+  kind: AttachmentKind;
+  /** المسار داخل الـbucket: `<userId>/<id>.<ext>` */
+  storagePath: string;
+  mimeType: AttachmentMime;
+  byteSize: number;
+  /** للصور: نحجز نسبة العرض قبل التحميل فلا تهتزّ الواجهة */
+  width?: number;
+  height?: number;
+  caption?: string;
+
+  /**
+   * مسار الملفّ على الجهاز. محلّيّ فقط — الشرطة السفلية تجعل
+   * `forPush` يُسقطه، فلا يُرسَل مسارُ جهازٍ إلى السيرفر.
+   */
+  _localUri?: string;
+  /** لم يُرفع الملفّ بعد. الصفّ يُزامَن قبل الملفّ ولا ينتظره. */
+  _pendingUpload?: boolean;
+  /** عدد المحاولات الفاشلة، لحساب التأجيل */
+  _attempts?: number;
+  _lastError?: string;
+}
+
 // ─── كل شي ───────────────────────────────────────────────────────────
 
 export interface AppState {
@@ -339,6 +386,7 @@ export interface AppState {
   goals: SavingsGoal[];
   deposits: SavingsDeposit[];
   transactions: Transaction[];
+  attachments: Attachment[];
   alertRules: AlertRule;
   alerts: Alert[];
   /** الوضع المختار في الإعداد — لمعرفة من وين جاءت الافتراضات */

@@ -25,6 +25,8 @@ export const TABLE_ORDER = [
   'sinking_funds',
   'savings_deposits',
   'transactions',
+  // بعد `transactions`: المرفق ابنٌ لها، ومفتاحه الأجنبيّ يرفضه قبلها
+  'attachments',
   'alerts',
 ] as const;
 
