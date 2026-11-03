@@ -330,7 +330,7 @@ export const en: Strings = {
     decimals: 'Decimal places',
     decimalsHint: '{count} places · follows the currency',
     privacy:
-      'Your data stays on your device. We never ask for an account or a bank connection — not now, not later.',
+      'Your data syncs across your devices under your account alone. We never ask for a bank connection — not now, not later.',
     shapeTitle: 'How does money reach you?',
     shapeHint:
       'Your answer sets up the categories and limits. Not a fixed template — you can change all of it afterwards.',
@@ -391,7 +391,7 @@ export const en: Strings = {
     },
     noneRequired: 'None of it is required',
     noneRequiredBody:
-      'Just log what you spend — the app works like that. Income, limits and goals are improvements, not requirements. And it needs no internet and no account.',
+      'Just log what you spend — the app works like that. Income, limits and goals are improvements, not requirements.',
   },
 
   more: {
@@ -416,7 +416,7 @@ export const en: Strings = {
     backup: 'Backup & export',
     backupHint: 'A file on your device · CSV',
     sync: 'Sync across your devices',
-    syncHint: 'Optional · needs an account',
+    syncHint: 'Automatic · runs in the background',
     lock: 'App lock',
     lockHint: 'Fingerprint or PIN',
     theme: 'Appearance',
@@ -427,7 +427,7 @@ export const en: Strings = {
     help: 'Help & questions',
     helpHint: 'How do I change a limit? How do I add a category?',
     version: '{name} · version {version}',
-    dataLocal: 'Your data is on your device',
+    dataLocal: 'Your data syncs under your account',
   },
 
   months: [

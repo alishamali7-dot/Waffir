@@ -36,7 +36,9 @@ const USD: Currency = { code: 'USD', symbol: '$', minorUnits: 2 };
 const JPY: Currency = { code: 'JPY', symbol: '¥', minorUnits: 0 };
 
 // نزيل علامتَي LRM قبل المقارنة: غير مرئيّتين ووجودهما مُختبَر وحده
-const bare = (s: string) => s.replace(/‎/g, '');
+// نزيل علامتَي العزل قبل المقارنة: LRM للاتينية و ALM للعربية.
+// غير مرئيّتين، ووجودهما مُختبَر وحده أدناه.
+const bare = (s: string) => s.replace(/[‎؜]/g, '');
 
 // ─── تطابق القائمتين ────────────────────────────────────────────────
 
@@ -210,48 +212,61 @@ test('الصفر في الإنجليزية لا يخرج «0 entries»', () => {
   assert.equal(plural('ar', 'entry', 0), 'لا توجد عمليات');
 });
 
-test('المال بأرقام لاتينية في اللغتين', () => {
-  assert.equal(bare(formatMoney(142500, KWD, 'ar')), '142.500 د.ك');
+test('المال بأرقام اللغة: عربية-هندية في العربية ولاتينية في الإنجليزية', () => {
+  assert.equal(bare(formatMoney(142500, KWD, 'ar')), '١٤٢٫٥٠٠ د.ك');
   assert.equal(bare(formatMoney(142500, KWD, 'en')), '142.500 د.ك');
 });
 
 test('خانات العملة لا خانات اللغة', () => {
-  assert.equal(bare(formatMoney(142500, KWD, 'ar', { withSymbol: false })), '142.500');
+  assert.equal(bare(formatMoney(142500, KWD, 'ar', { withSymbol: false })), '١٤٢٫٥٠٠');
   assert.equal(bare(formatMoney(14250, USD, 'en', { withSymbol: false })), '142.50');
   assert.equal(bare(formatMoney(1425, JPY, 'en', { withSymbol: false })), '1425');
 });
 
 test('الرموز المحارفية تتقدّم في الإنجليزية فقط', () => {
   assert.equal(bare(formatMoney(14250, USD, 'en')), '$142.50');
-  assert.equal(bare(formatMoney(14250, USD, 'ar')), '142.50 $');
+  assert.equal(bare(formatMoney(14250, USD, 'ar')), '١٤٢٫٥٠ $');
 });
 
 test('السالب: إشارة ناقص حقيقية، لا شرطة ASCII', () => {
   const out = bare(formatMoney(-6000, KWD, 'ar', { withSymbol: false }));
-  assert.equal(out, '−6.000');
+  assert.equal(out, '−٦٫٠٠٠');
   assert.ok(out.includes('−'), 'U+2212 لا hyphen');
   assert.ok(!out.includes('-'), 'بلا شرطة ASCII');
 });
 
-test('علامتا LRM تحيطان الرقم — تمنع انقلاب الإشارة في RTL', () => {
-  const out = formatMoney(-6000, KWD, 'ar');
-  assert.ok(out.startsWith('‎'), 'تبدأ بـ LRM');
-  assert.ok(
-    out.indexOf('‎', 1) > 0,
-    'وتُغلق بـ LRM بعد الرقم قبل الرمز',
-  );
-  // الرمز العربي خارج الجزيرة
-  assert.ok(out.endsWith('د.ك'));
+test('العزل: ALM مع الأرقام العربية و LRM مع اللاتينية', () => {
+  // الأرقام العربية-الهندية صنفها AN في bidi، وعلامتها ALM لا LRM.
+  // استعمال LRM معها يجبر اتجاهًا لاتينيًّا على رقم عربيّ فيزيد الخلل.
+  const ar = formatMoney(-6000, KWD, 'ar');
+  assert.ok(ar.startsWith('؜'), 'العربية تبدأ بـ ALM');
+  assert.ok(ar.indexOf('؜', 1) > 0, 'وتُغلق بـ ALM قبل الرمز');
+  assert.ok(!ar.includes('‎'), 'ولا LRM مع أرقام AN');
+  assert.ok(ar.endsWith('د.ك'), 'الرمز خارج الجزيرة');
+
+  const en = formatMoney(-6000, USD, 'en');
+  assert.ok(en.startsWith('‎'), 'الإنجليزية تبدأ بـ LRM');
+  assert.ok(!en.includes('؜'), 'ولا ALM مع أرقام EN');
+});
+
+test('الفاصلة العشرية تتبع الأرقام: ٫ مع العربية و . مع اللاتينية', () => {
+  // بلا رمز: «د.ك» نفسها فيها نقطة، فاختبارها مع الرمز يقيس الرمز
+  const ar = bare(formatMoney(142500, KWD, 'ar', { withSymbol: false }));
+  const en = bare(formatMoney(142500, KWD, 'en', { withSymbol: false }));
+  assert.equal(ar, '١٤٢٫٥٠٠');
+  assert.ok(!ar.includes('.'), 'لا نقطة لاتينية في الرقم العربيّ');
+  assert.equal(en, '142.500');
+  assert.ok(!en.includes('٫'), 'ولا فاصلة عربية في الرقم اللاتينيّ');
 });
 
 test('signed يُظهر + للموجب ولا يكرّر − للسالب', () => {
-  assert.equal(bare(formatMoney(6000, KWD, 'ar', { signed: true })), '+6.000 د.ك');
-  assert.equal(bare(formatMoney(-6000, KWD, 'ar', { signed: true })), '−6.000 د.ك');
-  assert.equal(bare(formatMoney(6000, KWD, 'ar')), '6.000 د.ك');
+  assert.equal(bare(formatMoney(6000, KWD, 'ar', { signed: true })), '+٦٫٠٠٠ د.ك');
+  assert.equal(bare(formatMoney(-6000, KWD, 'ar', { signed: true })), '−٦٫٠٠٠ د.ك');
+  assert.equal(bare(formatMoney(6000, KWD, 'ar')), '٦٫٠٠٠ د.ك');
 });
 
 test('الصفر بلا إشارة', () => {
-  assert.equal(bare(formatMoney(0, KWD, 'ar')), '0.000 د.ك');
+  assert.equal(bare(formatMoney(0, KWD, 'ar')), '٠٫٠٠٠ د.ك');
 });
 
 test('العدد في النصّ عربي-هندي، والنسبة بعلامتها', () => {

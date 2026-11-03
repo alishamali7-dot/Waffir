@@ -48,19 +48,29 @@ export function fill(
 // ─── الأرقام ─────────────────────────────────────────────────────────
 
 /**
- * علامتا LRM تحيطان الرقم.
+ * عزل الرقم عن اتجاه السطر.
  *
- * بدونهما ينكسر عرض المبالغ السالبة في النصّ العربيّ: المحرف `-`
- * محرف محايد في خوارزمية bidi، فيُلحق بالاتجاه المحيط ويظهر **يمين**
- * الرقم — «142.500-» بدل «-142.500». العلامتان تجعلان الرقم جزيرة
- * من اليسار لليمين داخل سطر من اليمين لليسار، فتستقرّ الإشارة مكانها.
+ * بلا عزل ينكسر عرض المبالغ السالبة: محرف الإشارة محايد في خوارزمية
+ * bidi فيُلحق بالاتجاه المحيط ويظهر **يمين** الرقم — «١٤٢٫٥٠٠−» بدل
+ * «−١٤٢٫٥٠٠».
  *
- * غير مرئيّتين، وبلا عرض، ولا تؤثّران على النسخ.
+ * والعلامة تختلف باختلاف الأرقام، وهذا ما يُغفل:
+ *
+ * - الأرقام اللاتينية (٠-٩ ASCII) صنفها **EN** في bidi، فتعزلها
+ *   LRM (`U+200E`).
+ * - الأرقام العربية-الهندية (٠١٢٣…) صنفها **AN**، ولها علامتها
+ *   الخاصّة: ALM (`U+061C`) — «علامة الحرف العربيّ»، موضوعة لهذا
+ *   الغرض بالضبط. واستعمال LRM معها يجبر اتجاهًا لاتينيًّا على رقم
+ *   عربيّ فيزيد الخلل.
+ *
+ * العلامتان غير مرئيّتين وبلا عرض ولا تؤثّران على النسخ.
  */
 const LRM = '‎';
+const ALM = '؜';
 
-function ltrIsland(s: string): string {
-  return LRM + s + LRM;
+function isolate(s: string, lang: Lang): string {
+  const mark = lang === 'ar' ? ALM : LRM;
+  return mark + s + mark;
 }
 
 export interface Currency {
@@ -70,11 +80,20 @@ export interface Currency {
 }
 
 /**
- * المال بأرقام لاتينية في اللغتين.
+ * فاصلة العشرية العربية `٫` (U+066B).
  *
- * هذا عُرف تطبيقات الخليج ولم أخالفه: المبلغ يُقرأ بلمحة، والأرقام
- * اللاتينية أسرع في القراءة الماليّة حتى لمن نصّه عربيّ بالكامل. أمّا
- * الأعداد في النصّ («٢٥ عملية») فعربيّة-هنديّة، وتلك `formatCount`.
+ * تُقترن بالأرقام العربية-الهندية كما تُقترن `.` باللاتينية. خلطُهما
+ * («١٤٢.٥٠٠») يُقرأ لكنّه غير متّسق طباعيًّا.
+ *
+ * تبدّلها بـ`'.'` إن أردت النقطة مع الأرقام العربية — ثابت واحد.
+ */
+const AR_DECIMAL = '٫';
+
+/**
+ * المال بأرقام اللغة: عربية-هندية في العربية، لاتينية في الإنجليزية.
+ *
+ * (كان لاتينيًّا في الاثنين على عُرف تطبيقات الخليج؛ غُيّر بطلب
+ * المالك في ٣ نوفمبر ٢٠٢٦.)
  */
 export function formatMoney(
   minor: number,
@@ -85,20 +104,24 @@ export function formatMoney(
   const { withSymbol = true, signed = false } = opts;
   const factor = Math.pow(10, currency.minorUnits);
   const negative = minor < 0;
-  const abs = (Math.abs(minor) / factor).toFixed(currency.minorUnits);
+  let abs = (Math.abs(minor) / factor).toFixed(currency.minorUnits);
+
+  if (lang === 'ar') {
+    abs = toArabicDigits(abs).replace('.', AR_DECIMAL);
+  }
 
   let sign = '';
   if (negative) sign = '−'; // U+2212، لا شرطة ASCII: أوضح وأعرض
   else if (signed) sign = '+';
 
-  const number = ltrIsland(sign + abs);
+  const number = isolate(sign + abs, lang);
   if (!withSymbol) return number;
 
   // الرموز المحارفيّة ($ € £) تتقدّم في الإنجليزية، ورموز الحروف
   // (د.ك، ر.س، KWD) تتأخّر في اللغتين.
   const punctuationSymbol = /^[^\p{L}]+$/u.test(currency.symbol);
   if (lang === 'en' && punctuationSymbol) {
-    return ltrIsland(currency.symbol + sign + abs);
+    return isolate(currency.symbol + sign + abs, lang);
   }
   return `${number} ${currency.symbol}`;
 }
