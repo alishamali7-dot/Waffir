@@ -1,0 +1,37 @@
+# أسرار — لا يُرفع أي ملف بيئة. القالب .env.example وحده يُرفع.
+.env
+.env.*
+!.env.example
+
+# اعتماديّات ومخرجات
+node_modules/
+.expo/
+dist/
+web-build/
+*.tsbuildinfo
+
+# أندرويد و iOS
+android/
+ios/
+*.keystore
+!debug.keystore
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# Expo / EAS
+.easignore
+
+# محرّرات وأنظمة
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/settings.json
+
+# سجلّات
+*.log
+npm-debug.log*
+yarn-error.log*
