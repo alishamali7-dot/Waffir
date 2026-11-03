@@ -7,6 +7,9 @@
 node_modules/
 .expo/
 dist/
+.next/
+out/
+.turbo/
 web-build/
 *.tsbuildinfo
 
