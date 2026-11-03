@@ -89,6 +89,24 @@ export const en: Strings = {
     savedIn: 'Logged in seconds',
   },
 
+  receipts: {
+    title: 'Receipts',
+    none: 'No receipt attached',
+    camera: 'Take photo',
+    gallery: 'From photos',
+    pdf: 'PDF file',
+    pending: 'Waiting to upload',
+    uploading: 'Uploading…',
+    failed: "Couldn't upload",
+    retry: 'Try again',
+    remove: 'Remove',
+    open: 'Open receipt',
+    cameraDenied: 'The camera needs permission in your device settings',
+    confirmRemove: 'Remove this receipt?',
+    offlineHint: 'It uploads on its own when you reconnect',
+    exhausted: 'Gave up retrying — retake it or remove it',
+  },
+
   income: {
     title: 'Income',
     subtitle: 'Where your money comes from',
