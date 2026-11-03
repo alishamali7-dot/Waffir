@@ -18,7 +18,10 @@ const USER = 'sample-user';
 
 /** مصروفات شهر، موزّعة على فئات وأيّام بما يشبه سلوكًا فعليًّا. */
 const SPEND: Array<[day: number, categoryId: string, amount: number, label: string]> = [
-  [1, 'bills', 450, 'إيجار'],
+  // الإيجار ليس هنا عن قصد: هو التزام ثابت يُخصم تلقائيًّا، فتسجيله
+  // عمليةً أيضًا يحسبه مرّتين — وهذا ما يفترض بالتطبيق أن يمنعه،
+  // فلا يصحّ أن تُظهره العيّنة.
+  [3, 'bills', 18.4, 'كهرباء وماء'],
   [2, 'food', 24.5, 'بقالة'],
   [2, 'cafe', 1.5, 'قهوة'],
   [4, 'transport', 12, 'بنزين'],
@@ -59,9 +62,21 @@ export class SampleSource implements DataSource {
   async loadState(): Promise<AppState> {
     const month = monthKeyOf(new Date());
     const state = seedState('fixed_salary', SAMPLE_INCOME, 'KWD', 1);
+    const mu = state.income.currency.minorUnits;
+
+    // البذرة تضع الالتزامات بمبلغ صفر عن قصد — لا تخترع رقمًا
+    // للمستخدم. لكن العيّنة غرضها إظهار الشاشة وهي تعمل، وصفرٌ في
+    // «محجوز للالتزامات» لا يُظهر شيئًا. فنملؤها هنا، في العيّنة
+    // وحدها، لا في البذرة.
+    const amounts: Record<string, number> = { rent: 320, utilities: 38, phone: 12 };
+
     return {
       ...state,
-      transactions: buildTransactions(month, state.income.currency.minorUnits),
+      commitments: state.commitments.map((c) => ({
+        ...c,
+        amount: toFils(amounts[c.id] ?? 0, mu),
+      })),
+      transactions: buildTransactions(month, mu),
     };
   }
 }

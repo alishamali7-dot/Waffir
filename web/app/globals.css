@@ -1,0 +1,308 @@
+/*
+ * الرموز نفسها المستعملة في تصميم الجوّال، حتى لا يصير للتطبيق
+ * شخصيّتان. ولوحة الفئات بالذات متطابقة حرفًا بحرف مع
+ * `templates.ts` — الفئة تملك لونها في كلّ شاشة.
+ */
+
+:root {
+  --ground: #FBF7F2;
+  --surface: #FFFFFF;
+  --sunken: #F1E9DD;
+  --line: #EFE7DC;
+  --line-soft: #F3EDE4;
+
+  --ink: #212529;
+  --ink-soft: #495057;
+  --ink-faint: #6B6257;
+  --ink-ghost: #9A9088;
+
+  --brand: #0B4F63;
+  --brand-ink: #073D4D;
+  --brand-tint: #DFF0F5;
+  --brand-lift: #11637C;
+  --on-brand: #BBDCE6;
+
+  --accent: #E8590C;
+
+  --good: #2B6B2F;
+  --good-tint: #E8F3E6;
+  --warn: #8C5000;
+  --warn-tint: #FDF0E6;
+  --bad: #B01B1B;
+  --bad-ink: #8A1515;
+  --bad-tint: #FBE9EB;
+
+  --radius-lg: 22px;
+  --radius: 17px;
+  --radius-sm: 13px;
+
+  --page: 980px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ground: #16130F;
+    --surface: #211D18;
+    --sunken: #2B2620;
+    --line: #342E26;
+    --line-soft: #2B2620;
+
+    --ink: #F4EFE8;
+    --ink-soft: #D6CEC3;
+    --ink-faint: #A79C8D;
+    --ink-ghost: #7E7365;
+
+    --brand: #3E9CB5;
+    --brand-ink: #BBDCE6;
+    --brand-tint: #15323C;
+    --brand-lift: #1C4C5C;
+    --on-brand: #BBDCE6;
+
+    --accent: #F97A33;
+
+    --good: #6FBF74;
+    --good-tint: #1B2E1C;
+    --warn: #E0A458;
+    --warn-tint: #33240F;
+    --bad: #E9696B;
+    --bad-ink: #F2A0A1;
+    --bad-tint: #341718;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 { margin: 0; line-height: 1.3; }
+
+a { color: var(--brand); }
+
+/*
+ * الأرقام تُقرأ أسرع إن تساوت عروضها، فلا يرقص العمود عند التغيير.
+ * و `tabular-nums` تفعل ذلك في العربية-الهندية كما في اللاتينية.
+ */
+.num { font-variant-numeric: tabular-nums; }
+
+/* ─── الهيكل ──────────────────────────────────────────────────────── */
+
+.shell {
+  max-width: var(--page);
+  margin-inline: auto;
+  padding: 0 16px 64px;
+}
+
+.topbar {
+  max-width: var(--page);
+  margin-inline: auto;
+  padding: 20px 16px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--brand);
+  text-decoration: none;
+  margin-inline-end: auto;
+}
+
+/* ─── شريط التنقّل ────────────────────────────────────────────────── */
+
+.nav {
+  max-width: var(--page);
+  margin-inline: auto;
+  padding: 0 16px 20px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nav a {
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--ink-faint);
+  background: var(--sunken);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav a[aria-current='page'] {
+  background: var(--brand);
+  color: #FFFFFF;
+}
+
+/* ─── الكروت ──────────────────────────────────────────────────────── */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+}
+
+.grid {
+  display: grid;
+  gap: 14px;
+  /* يلتفّ وحده: عمودان على الشاشة الواسعة وعمود على الجوّال */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+
+.hero {
+  background: var(--brand);
+  color: #FFFFFF;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.hero-label { font-size: 13px; color: var(--on-brand); }
+
+.hero-figure {
+  font-size: clamp(34px, 7vw, 46px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.05;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.hero-stat {
+  background: var(--brand-lift);
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hero-stat dt { font-size: 11px; color: var(--on-brand); }
+.hero-stat dd { margin: 0; font-size: 15px; font-weight: 600; }
+
+/* ─── الأشرطة ─────────────────────────────────────────────────────── */
+
+.bar {
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--sunken);
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.split {
+  display: flex;
+  height: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ─── صفوف ────────────────────────────────────────────────────────── */
+
+.rows { display: flex; flex-direction: column; gap: 8px; }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: inherit;
+}
+
+.row-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.row-title { font-size: 14px; font-weight: 500; }
+.row-meta { font-size: 12px; color: var(--ink-faint); }
+.row-figure { font-size: 15px; font-weight: 600; flex: 0 0 auto; }
+
+.dot { width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto; }
+.swatch { width: 11px; height: 11px; border-radius: 3px; flex: 0 0 auto; }
+
+.chip {
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 5px 11px;
+  flex: 0 0 auto;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 26px 2px 10px;
+}
+
+.section-head h2 { font-size: 16px; font-weight: 700; }
+
+.muted { color: var(--ink-faint); font-size: 13px; }
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--warn-tint);
+  color: var(--warn);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.day-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  padding: 0 2px;
+  margin-top: 6px;
+}
+
+.langbtn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--sunken);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--ink-faint);
+}

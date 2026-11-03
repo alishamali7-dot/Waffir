@@ -126,7 +126,10 @@ function baseCategories(income: number, minorUnits: number): Category[] {
     cat('food', 'أكل وشراب', PALETTE.food, ICONS.food, pct(0.05), ['مقاضي', 'سوق', 'لحم', 'دجاج', 'خضار', 'مخبز'], 1, minorUnits),
     cat('cafe', 'مطاعم وقهوة', PALETTE.cafe, ICONS.cafe, pct(0.022), ['قهوة', 'كافي', 'مطعم', 'برجر', 'شاورما', 'حلويات', 'طلبات'], 2, minorUnits),
     cat('transport', 'مواصلات', PALETTE.transport, ICONS.transport, pct(0.022), ['بنزين', 'وقود', 'غسيل', 'تاير', 'ورشة', 'موقف', 'تاكسي'], 3, minorUnits),
-    cat('bills', 'فواتير وإيجار', PALETTE.bills, ICONS.bills, null, ['كهرباء', 'ماء', 'إنترنت', 'جوال', 'إيجار'], 4, minorUnits),
+    // حدّ حقيقيّ لا `null`: الإيجار يسكن الالتزامات الثابتة، وهذه
+    // الفئة للفواتير التي يسجّلها المستخدم. وفئة واحدة فقط تأخذ
+    // المتبقّي، وهي «أخرى» أدناه — القاعدة تفرض ذلك بفهرس فريد.
+    cat('bills', 'فواتير وإيجار', PALETTE.bills, ICONS.bills, pct(0.04), ['كهرباء', 'ماء', 'إنترنت', 'جوال'], 4, minorUnits),
     cat('shopping', 'تسوّق', PALETTE.shopping, ICONS.shopping, pct(0.032), ['ملابس', 'أحذية', 'مول', 'أثاث', 'إلكترونيات'], 5, minorUnits),
     cat('health', 'صحة', PALETTE.health, ICONS.health, pct(0.027), ['صيدلية', 'دكتور', 'عيادة', 'علاج', 'حلاق', 'مختبر'], 6, minorUnits),
     cat('kids', 'أطفال وتعليم', PALETTE.kids, ICONS.kids, pct(0.027), ['حفاظ', 'حليب', 'ألعاب', 'مدرسة', 'روضة', 'دورة'], 7, minorUnits),
@@ -162,7 +165,7 @@ const emergencyGoal = (income: number, minorUnits: number): SavingsGoal => ({
 
 export const SITUATIONS: SituationSeed[] = [
   {
-    shape: 'fixed-salary',
+    shape: 'fixed_salary',
     name: 'راتب شهري ثابت',
     note: 'ينزل في يوم معروف كل شهر',
     gives: 'يجهّز: التزامات ثابتة + حدود شهرية + شهر مالي يبدأ يوم الراتب',
@@ -311,7 +314,7 @@ export function seedState(
       categoryWarnAt: 0.85,
       duplicateSubscriptions: true,
       dailySavingsReminderAt: null,
-      salaryDayRollover: shape === 'fixed-salary',
+      salaryDayRollover: shape === 'fixed_salary',
     },
     alerts: [],
     seededFrom: shape,

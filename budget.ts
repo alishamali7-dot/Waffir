@@ -107,7 +107,14 @@ export function computeBudget(state: AppState, month: MonthKey): MonthBudget {
       spent,
       remaining: limit - spent,
       ratio,
-      state: spent > limit ? 'over' : ratio >= warnAt ? 'near' : 'ok',
+      /**
+       * `>=` لا `>`: بلوغ الحدّ تمامًا ليس اقترابًا منه.
+       *
+       * كان `>` يعطي حالة «اقترب من الحدّ» مع «المتبقّي ٠٫٠٠٠»،
+       * وهما جملتان متناقضتان في سطر واحد. والتصرّف المطلوب عند
+       * البلوغ هو التصرّف عند التجاوز نفسه: أوقف الصرف.
+       */
+      state: spent >= limit ? 'over' : ratio >= warnAt ? 'near' : 'ok',
     };
   });
 
