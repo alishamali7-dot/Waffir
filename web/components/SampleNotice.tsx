@@ -28,8 +28,8 @@ export async function SampleNotice({ isLive }: { isLive: boolean }) {
       </svg>
       <span>
         {lang === 'ar'
-          ? 'بيانات عيّنة — لتقييم الواجهة. تصير بياناتك الحقيقية بعد إضافة تسجيل الدخول.'
-          : 'Sample data, so the interface can be judged. It becomes your own once sign-in is added.'}
+          ? 'بيانات عيّنة — لتقييم الواجهة. سجّل الدخول لتظهر بياناتك.'
+          : 'Sample data, so the interface can be judged. Sign in to see your own.'}
       </span>
     </div>
   );

@@ -1,0 +1,491 @@
+/*
+ * أنماط صفحة الدخول — تُحمَّل مع هذه الصفحة وحدها.
+ *
+ * الرموز من `globals.css` كما هي، فالوضع الداكن يعمل بلا سطرٍ زائد
+ * هنا. والجديد وحده: خلفيّةٌ متحرّكة وحركاتُ الدخول.
+ *
+ * قاعدتان تحكمان كلّ حركةٍ تحت:
+ *
+ * ١. `transform` و`opacity` وحدهما في ما يتحرّك باستمرار. تغيير العرض
+ *    أو الموضع يُجبر المتصفّح على إعادة التخطيط في كلّ إطار، ويُسمع
+ *    ذلك مروحةً على الحاسوب وبطّاريةً على الجوّال.
+ *
+ * ٢. لا `letter-spacing` على نصٍّ عربيّ أبدًا. الحرف العربيّ متّصل،
+ *    والتبعيد يفصل الكلمة حروفًا متناثرة. وهو أوّل ما يُفسد التصميم
+ *    العربيّ حين يُنسخ من قالبٍ لاتينيّ.
+ */
+
+.auth-page {
+  position: relative;
+  min-height: calc(100dvh - 120px);
+  display: grid;
+  place-items: center;
+  padding: 24px 0 56px;
+}
+
+/* صفحة الدخول لا تُبحِر في التطبيق: التبويبات تُخفى ولا تُحذف. */
+body:has(.auth-page) .nav,
+body:has(.auth-page) a.langbtn[href='/login'] {
+  display: none;
+}
+
+/* ─── الخلفيّة ────────────────────────────────────────────────────── */
+
+/*
+ * ثلاث بقعٍ بثلاثة ألوان من اللوحة نفسها — لا تدرّجٌ رماديّ واحد.
+ * التمويه ثقيل، فيجري مرّةً على عنصرٍ ثابت والحركة على أبنائه.
+ *
+ * `fixed` لا `absolute`: داخل عمود الصفحة تُقصّ البقع عند حافّته
+ * فيظهر مستطيلٌ صريح. وخلف الشريط العلويّ بـz-index سالب.
+ */
+.auth-aurora {
+  position: fixed;
+  inset: -12%;
+  z-index: -1;
+  filter: blur(68px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.auth-aurora span {
+  position: absolute;
+  display: block;
+  width: 46%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  will-change: transform;
+}
+
+.auth-aurora span:nth-child(1) {
+  inset-inline-start: 2%;
+  inset-block-start: 4%;
+  background: radial-gradient(circle, var(--brand) 0%, transparent 68%);
+  animation: auth-drift-a 26s ease-in-out infinite;
+}
+
+.auth-aurora span:nth-child(2) {
+  inset-inline-end: 0%;
+  inset-block-start: 18%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 66%);
+  animation: auth-drift-b 31s ease-in-out infinite;
+}
+
+.auth-aurora span:nth-child(3) {
+  inset-inline-start: 22%;
+  inset-block-end: 0%;
+  background: radial-gradient(circle, var(--good) 0%, transparent 70%);
+  animation: auth-drift-c 24s ease-in-out infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .auth-aurora {
+    opacity: 0.38;
+  }
+}
+
+/* أزمنةٌ مختلفة وأطوارٌ مختلفة: بلا ذلك تتنفّس الثلاث معًا فيُرى النمط. */
+@keyframes auth-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(14%, 10%, 0) scale(1.18); }
+}
+
+@keyframes auth-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.1); }
+  40%      { transform: translate3d(-12%, 14%, 0) scale(0.92); }
+  70%      { transform: translate3d(-4%, -8%, 0) scale(1.14); }
+}
+
+@keyframes auth-drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.96); }
+  55%      { transform: translate3d(10%, -12%, 0) scale(1.2); }
+}
+
+/* ─── البطاقة ─────────────────────────────────────────────────────── */
+
+.auth-card {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 410px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 26px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04), 0 18px 44px -22px rgb(0 0 0 / 0.26);
+  animation: auth-rise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes auth-rise {
+  from { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ─── مبدّل الوضع ─────────────────────────────────────────────────── */
+
+.auth-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--sunken);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+}
+
+/*
+ * الحبّة تتحرّك بـ`inset-inline-start` لا `translateX`.
+ *
+ * التحويلات فيزيائيّة: `translateX(100%)` يذهب يمينًا في العربية
+ * والإنجليزية سواء، فتسير الحبّة في الاتجاه الخطأ في إحداهما. أمّا
+ * الخصائص المنطقيّة فتنقلب مع `dir` وحدها. وحركةٌ واحدة لزرٍّ واحد
+ * لا تُقاس بتكلفة التخطيط.
+ */
+.auth-pill {
+  position: absolute;
+  inset-block: 4px;
+  inset-inline-start: 4px;
+  width: calc(50% - 4px);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+  transition: inset-inline-start 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-pill[data-mode='up'] {
+  inset-inline-start: 50%;
+}
+
+.auth-tab {
+  position: relative;
+  z-index: 1;
+  appearance: none;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  padding: 9px 0;
+  min-height: 40px;
+  cursor: pointer;
+  border-radius: 10px;
+  transition: color 200ms ease;
+}
+
+.auth-tab[aria-checked='true'] {
+  color: var(--brand);
+}
+
+.auth-tab:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ─── العنوان ─────────────────────────────────────────────────────── */
+
+.auth-head {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.auth-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.auth-sub {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-faint);
+}
+
+/* ─── الحقول ──────────────────────────────────────────────────────── */
+
+/* `--i` من JSX: تتابعٌ بلا صنفٍ لكلّ حقل. */
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: auth-rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 90ms);
+}
+
+.auth-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.auth-field input {
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--ground);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 13px;
+  min-height: 46px;
+  width: 100%;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.auth-field input::placeholder {
+  color: var(--ink-ghost);
+}
+
+.auth-field input:focus {
+  outline: none;
+  background: var(--surface);
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3.5px var(--brand-tint);
+}
+
+.auth-secret {
+  position: relative;
+  display: flex;
+}
+
+/* مساحةٌ للعين، منطقيّةٌ لا يمنى: تنقلب مع اتجاه الصفحة. */
+.auth-secret input {
+  padding-inline-end: 46px;
+}
+
+.auth-eye {
+  position: absolute;
+  inset-inline-end: 4px;
+  inset-block: 4px;
+  width: 38px;
+  display: grid;
+  place-items: center;
+  appearance: none;
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  color: var(--ink-faint);
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.auth-eye:hover {
+  color: var(--brand);
+  background: var(--brand-tint);
+}
+
+.auth-eye:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+/*
+ * الارتفاع من `0fr` إلى `1fr`.
+ *
+ * `max-height` يحتاج رقمًا مكتوبًا بيد، فإن طال النصّ أو كبر الخطّ
+ * قُطع. وشبكةٌ بصفٍّ كسريّ تقيس المحتوى وحدها.
+ */
+.auth-hint {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 280ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease;
+}
+
+.auth-hint[data-show='true'] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.auth-hint > span {
+  overflow: hidden;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+  padding-block-start: 5px;
+}
+
+/* ─── الخطأ ───────────────────────────────────────────────────────── */
+
+.auth-error {
+  margin: 0;
+  background: var(--bad-tint);
+  color: var(--bad-ink);
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.55;
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  animation: auth-shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* اهتزازٌ صغير: يُرى ولا يُقرأ كعطل. */
+@keyframes auth-shake {
+  0%   { transform: translate3d(0, -4px, 0); opacity: 0; }
+  30%  { transform: translate3d(-5px, 0, 0); opacity: 1; }
+  50%  { transform: translate3d(4px, 0, 0); }
+  70%  { transform: translate3d(-2px, 0, 0); }
+  100% { transform: none; opacity: 1; }
+}
+
+/* ─── الإرسال ─────────────────────────────────────────────────────── */
+
+.auth-go {
+  appearance: none;
+  border: 0;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--brand);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  min-height: 48px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  transition: background 180ms ease, transform 120ms ease, box-shadow 180ms ease;
+  box-shadow: 0 10px 22px -14px var(--brand);
+}
+
+.auth-go:hover:not(:disabled) {
+  background: var(--brand-lift);
+}
+
+.auth-go:active:not(:disabled) {
+  transform: translate3d(0, 1px, 0);
+}
+
+.auth-go:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+.auth-go:disabled {
+  opacity: 0.72;
+  cursor: progress;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .auth-go {
+    color: #08232B;
+  }
+}
+
+.auth-spin {
+  width: 15px;
+  height: 15px;
+  border: 2px solid currentColor;
+  border-block-start-color: transparent;
+  border-radius: 50%;
+  animation: auth-turn 700ms linear infinite;
+}
+
+@keyframes auth-turn {
+  to { transform: rotate(1turn); }
+}
+
+/* ─── البديل ──────────────────────────────────────────────────────── */
+
+.auth-alt {
+  margin: 0;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+}
+
+.auth-alt button {
+  appearance: none;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--brand);
+  cursor: pointer;
+  padding: 4px 2px;
+  border-radius: 6px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.auth-alt button:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+/* ─── أُرسل البريد ────────────────────────────────────────────────── */
+
+.auth-done {
+  align-items: center;
+  text-align: center;
+  gap: 13px;
+  padding: 34px 24px 26px;
+}
+
+.auth-done-mark {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--good-tint);
+  color: var(--good);
+  animation: auth-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation-delay: 80ms;
+}
+
+@keyframes auth-pop {
+  from { opacity: 0; transform: scale(0.5); }
+  to   { opacity: 1; transform: none; }
+}
+
+.auth-ghost {
+  appearance: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--brand);
+  background: var(--brand-tint);
+  border: 0;
+  border-radius: var(--radius-sm);
+  padding: 12px 20px;
+  min-height: 44px;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.auth-ghost:hover {
+  background: var(--on-brand);
+}
+
+.auth-ghost:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ─── من يطلب سكونًا ──────────────────────────────────────────────── */
+
+/*
+ * ليس تفضيلًا في الذوق: الحركة الدائمة تُسبّب دوارًا ومرضًا لمن له
+ * حساسيّةٌ حركيّة. فتسكن البقع وتظهر البطاقة بلا انزلاق، ويبقى
+ * الدوّار وحده لأنّه إشارةُ انتظارٍ لا زينة.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .auth-aurora span,
+  .auth-card,
+  .auth-field,
+  .auth-done-mark,
+  .auth-error {
+    animation: none;
+  }
+
+  .auth-pill,
+  .auth-hint,
+  .auth-go,
+  .auth-field input {
+    transition-duration: 1ms;
+  }
+}

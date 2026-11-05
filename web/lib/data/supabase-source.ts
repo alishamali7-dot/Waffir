@@ -121,7 +121,9 @@ export class SupabaseSource implements DataSource {
       .select('*')
       .is('deleted_at', null)
       .gte('occurred_at', since.toISOString())
-      .order('occurred_at', { ascending: false });
+      .order('occurred_at', { ascending: false })
+      // عمليات اليوم الواحد تحمل الوقت نفسه (انظر `occurredAtOf`).
+      .order('created_at', { ascending: false });
     if (error) throw new Error(`transactions: ${error.message}`);
     return (data ?? []) as Row[];
   }

@@ -3,6 +3,7 @@ import { IBM_Plex_Sans, IBM_Plex_Sans_Arabic } from 'next/font/google';
 
 import { LangToggle } from '@/components/LangToggle';
 import { Nav } from '@/components/Nav';
+import { SessionChip } from '@/components/SessionChip';
 import { getLocale } from '@/lib/lang';
 
 import './globals.css';
@@ -50,6 +51,7 @@ export default async function RootLayout({
           <a className="brand" href="/">
             {s.app.name}
           </a>
+          <SessionChip />
           <LangToggle lang={lang} />
         </header>
         <Nav />

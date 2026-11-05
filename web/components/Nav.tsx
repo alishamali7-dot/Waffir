@@ -8,6 +8,7 @@ export async function Nav() {
     { href: '/', label: s.nav.home },
     { href: '/transactions', label: s.nav.transactions },
     { href: '/budget', label: s.nav.budget },
+    { href: '/add', label: s.nav.add },
   ] as const;
 
   return (

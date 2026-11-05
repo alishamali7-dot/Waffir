@@ -123,3 +123,37 @@ test('monthKeyOf يبطّن الشهر بصفر', () => {
   assert.equal(monthKeyOf(new Date(2026, 0, 15)), '2026-01');
   assert.equal(monthKeyOf(new Date(2026, 10, 3)), '2026-11');
 });
+
+test('حسابٌ جديد بلا دخل: لا فئة حمراء قبل أيّ صرف', () => {
+  const b = computeBudget(seedState('fixed_salary', 0), MONTH);
+  assert.ok(b.categories.length > 0);
+  assert.deepEqual(b.categories.filter((c) => c.state !== 'ok'), []);
+});
+
+test('بلا دخل: الصرف يُسجَّل ولا يُعدّ تجاوزًا', () => {
+  const base = seedState('fixed_salary', 0);
+  const tx: Transaction = {
+    id: 't1', occurredAt: `${MONTH}-05T10:00:00.000Z`, amount: toFils(12),
+    direction: 'debit', description: 'x', categoryId: 'food', accountId: 'card',
+    source: 'manual', needsReview: false, dedupeKey: 't1',
+  };
+  const food = computeBudget({ ...base, transactions: [tx] }, MONTH)
+    .categories.find((c) => c.categoryId === 'food')!;
+  assert.equal(food.spent, toFils(12));
+  assert.equal(food.state, 'ok');
+});
+
+test('حدٌّ صفريّ مع دخلٍ وصرفٍ يبقى تجاوزًا', () => {
+  const base = seedState('fixed_salary', 1000);
+  const state: AppState = {
+    ...base,
+    categories: base.categories.map((c) => (c.id === 'food' ? { ...c, monthlyLimit: 0 } : c)),
+    transactions: [{
+      id: 't1', occurredAt: `${MONTH}-05T10:00:00.000Z`, amount: toFils(3),
+      direction: 'debit', description: 'x', categoryId: 'food', accountId: 'card',
+      source: 'manual', needsReview: false, dedupeKey: 't1',
+    }],
+  };
+  const food = computeBudget(state, MONTH).categories.find((c) => c.categoryId === 'food')!;
+  assert.equal(food.state, 'over');
+});

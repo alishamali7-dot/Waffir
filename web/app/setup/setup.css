@@ -1,0 +1,396 @@
+/*
+ * أنماط الإعداد الأوّل، فوق أنماط صفحة الدخول (`../login/auth.css`).
+ * القواعد نفسها: حركةٌ بـtransform و opacity، ولا letter-spacing على عربيّ،
+ * وخصائص منطقيّة لتنقلب الصفحة مع `dir`.
+ */
+
+.setup-card {
+  width: min(100%, 500px);
+  gap: 16px;
+}
+
+.setup-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ─── التقدّم ─────────────────────────────────────────────────────── */
+
+.setup-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.setup-bars {
+  display: flex;
+  gap: 6px;
+}
+
+.setup-bars span {
+  flex: 1 1 0;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--sunken);
+  transition: background 320ms ease;
+}
+
+.setup-bars span[data-on='true'] {
+  background: var(--brand);
+}
+
+.setup-count {
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+/* ─── الخطوة ──────────────────────────────────────────────────────── */
+
+.setup-step {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  animation: auth-rise 340ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.setup-step h1:focus {
+  outline: none;
+}
+
+.setup-step fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+  position: relative;
+}
+
+.setup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.setup-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ─── الخيار ──────────────────────────────────────────────────────── */
+
+/*
+ * radio حقيقيّ مخفيّ بصريًّا داخل label: الأسهم وTab والقارئ تعمل بلا سطر
+ * JavaScript، والحلقة تُرسم بـ`:has(:focus-visible)`.
+ */
+.setup-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 11px 13px;
+  background: var(--ground);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease, transform 120ms ease;
+}
+
+.setup-option:hover {
+  border-color: var(--ink-ghost);
+}
+
+.setup-option:active {
+  transform: scale(0.99);
+}
+
+.setup-option[data-on='true'] {
+  background: var(--brand-tint);
+  border-color: var(--brand);
+}
+
+.setup-option:has(:focus-visible) {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+.setup-option input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.setup-option-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.setup-symbol {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-faint);
+}
+
+.setup-wide {
+  align-items: flex-start;
+}
+
+.setup-option-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setup-option-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.setup-option-hint {
+  display: block;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+}
+
+.setup-badge {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--good);
+  background: var(--good-tint);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.setup-option .auth-hint > span {
+  color: var(--brand-ink);
+}
+
+.setup-note {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-faint);
+}
+
+/* ─── الدخل ───────────────────────────────────────────────────────── */
+
+.setup-money {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.setup-money input {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 22px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.setup-money input[aria-invalid='true'] {
+  border-color: var(--bad);
+}
+
+.setup-money .setup-symbol {
+  font-size: 14px;
+}
+
+.setup-payday {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+}
+
+.setup-payday label {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.setup-payday select {
+  flex: 0 0 auto;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand);
+  background: var(--brand-tint);
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-height: 44px;
+  min-width: 76px;
+  cursor: pointer;
+}
+
+.setup-payday select:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* ─── التقسيم ─────────────────────────────────────────────────────── */
+
+.setup-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 320ms cubic-bezier(0.22, 1, 0.36, 1), opacity 260ms ease;
+}
+
+.setup-reveal[data-show='true'] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.setup-reveal > div {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.setup-split {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-tint);
+  color: var(--brand-ink);
+}
+
+.setup-split h2 {
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+/* الشريحة تتّسع بـflex-grow فيتحرّك الشريط مع كلّ رقمٍ يُكتب. */
+.setup-stack {
+  display: flex;
+  gap: 2px;
+  height: 9px;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.setup-stack span {
+  flex: 1 1 0;
+  min-width: 3px;
+  transition: flex-grow 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.setup-split ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.setup-split li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.setup-split li > span:first-of-type {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.setup-split i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.setup-pct {
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+.setup-amount {
+  font-weight: 600;
+  min-width: 74px;
+  text-align: end;
+}
+
+.setup-split p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.55;
+  opacity: 0.85;
+}
+
+/* ─── الأزرار ─────────────────────────────────────────────────────── */
+
+.setup-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.setup-actions .auth-go {
+  flex: 1 1 auto;
+}
+
+.setup-skip {
+  appearance: none;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  padding: 8px;
+  min-height: 44px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.setup-skip:hover:not(:disabled) {
+  color: var(--ink);
+}
+
+.setup-skip:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 1px;
+}
+
+@media (max-width: 420px) {
+  .setup-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .setup-step {
+    animation: none;
+  }
+
+  .setup-bars span,
+  .setup-option,
+  .setup-reveal,
+  .setup-stack span {
+    transition-duration: 1ms;
+  }
+}
