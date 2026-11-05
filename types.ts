@@ -342,11 +342,41 @@ export const ALLOWED_ATTACHMENT_MIME = [
 
 export type AttachmentMime = (typeof ALLOWED_ATTACHMENT_MIME)[number];
 
+/** ثقة النموذج في قراءة المبلغ. `low` تعني: اعرضه ولا تملأ به حقلًا. */
+export type ExtractionConfidence = 'high' | 'medium' | 'low';
+
+/**
+ * ناتج قراءة فاتورة. كلّ حقلٍ قد يغيب، لأنّ الفاتورة قد تكون ممزّقةً أو
+ * باهتةً أو بلا تاريخ. الغياب أصدق من التخمين.
+ */
+export interface ReceiptExtraction {
+  merchant: string | null;
+  /** المبلغ كما طُبع، محفوظًا بحروفه ليراه المستخدم كما رآه على الورقة. */
+  total_text: string | null;
+  /**
+   * المبلغ بالوحدات الصغرى، أو null إن كان النصّ ملتبسًا أو العملة مجهولة.
+   * null هنا ليست خطأً: هي رفضُ تخمينِ رقمٍ في المال.
+   */
+  total_minor: Fils | null;
+  /** رمز ISO 4217 كما قُرئ من الفاتورة، لا عملة الحساب. */
+  currency: string | null;
+  /** YYYY-MM-DD أو null. */
+  date: string | null;
+  confidence: ExtractionConfidence;
+  /** النموذج الذي قرأ، لتمييز قراءةٍ قديمة من أخرى بعد تغييره. */
+  model: string;
+  read_at: string;
+}
+
 /**
  * صورة فاتورة أو ملفّ PDF يرفقه المستخدم بعملية.
  *
- * ليس استيرادًا: الملفّ يختاره المستخدم بيده ولا يُقرأ محتواه. الـPDF
- * يُخزَّن ويُعرض، ولا يُستخرج منه رقم (راجع INTEGRATION.md).
+ * ليس استيرادًا: الملفّ يختاره المستخدم بيده، ولا يأتي من بنكٍ ولا من
+ * كشفٍ. هذا هو الفرق الذي بقي قائمًا.
+ *
+ * أمّا القراءة فقد صارت ممكنة: دالّة `read-receipt` تستخرج اقتراحًا
+ * (متجر، مبلغ، تاريخ) ويبقى اقتراحًا حتّى يؤكّده المستخدم. لا شيء يُكتب
+ * في `Transaction` من نفسه.
  */
 export interface Attachment {
   id: string;
@@ -368,6 +398,15 @@ export interface Attachment {
   _localUri?: string;
   /** لم يُرفع الملفّ بعد. الصفّ يُزامَن قبل الملفّ ولا ينتظره. */
   _pendingUpload?: boolean;
+  /**
+   * ما قرأته `read-receipt` من الفاتورة. اقتراحٌ يُعرض، لا مصدرَ حقيقة:
+   * المبلغ المعتمد هو `Transaction.amountMinor` الذي أكّده المستخدم.
+   * يبقى غائبًا حتّى تُطلب القراءة.
+   */
+  extraction?: ReceiptExtraction;
+  /** وقت آخر قراءة ناجحة. حضورُه وحضورُ `extraction` متلازمان. */
+  extractedAt?: string;
+
   /** عدد المحاولات الفاشلة، لحساب التأجيل */
   _attempts?: number;
   _lastError?: string;

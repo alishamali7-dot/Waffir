@@ -197,8 +197,12 @@ export async function pickFromLibrary(deps: CaptureDeps): Promise<CaptureResult>
 /**
  * ملفّ PDF.
  *
- * يُرفق ولا يُقرأ: لا استخراج نصّ ولا مبلغ. هذا قرار المالك، وهو ما
- * يفصل «إرفاق فاتورة» عن «استيراد كشف» المرفوض (راجع INTEGRATION.md).
+ * الملفّ يختاره المستخدم بيده ولا يأتي من بنكٍ ولا من كشف — هذا هو القرار
+ * الذي رفض به المالك «استيراد الكشف»، وهو باقٍ.
+ *
+ * أمّا قراءة الفاتورة فصارت ممكنةً بطلبه: `supabase/functions/read-receipt`
+ * يستخرج اقتراحًا من الملفّ بعد رفعه. الاقتراح يُعرض ولا يُقيَّد، ولا شيء
+ * هنا يقرأ الملفّ على الجهاز.
  */
 export async function pickPdf(deps: CaptureDeps): Promise<CaptureResult> {
   const res = await deps.documents.getDocumentAsync({
