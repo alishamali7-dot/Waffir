@@ -39,8 +39,12 @@ export function normalizeDigits(input: string): string {
   return out;
 }
 
+/**
+ * `(?<!\p{L})` لا `\b`: الحدّ `\b` يعرف الحروف اللاتينية وحدها، فكان لا
+ * يطابق كلمةً عربية أبدًا، وتتسرّب «دنانير» إلى اسم المصروف.
+ */
 const CURRENCY_NOISE =
-  /\b(?:د\.?\s?ك|دينار|دنانير|فلس|فلوس|kwd|kd|dinar)\b/giu;
+  /(?<!\p{L})(?:د\.?\s?[كبإأ]|ر\.?\s?[سقع]|ج\.?\s?م|دينار|دنانير|فلس|فلوس|ريال|درهم|دراهم|جنيه|دولار|يورو|kwd|kd|sar|aed|usd|eur|dinar)(?!\p{L})/giu;
 
 /**
  * المبلغ = آخر رقم في النص. "٢ قهوة" و"قهوة ٢" يشتغلان.
@@ -60,7 +64,8 @@ function extractAmount(text: string): { amount: number | null; without: string }
 export function foldArabic(s: string): string {
   return s
     .normalize('NFKD')
-    .replace(/[ً-ْٰـ]/g, '') // تشكيل + تطويل
+    // حتى U+0655: بعد NFKD صارت «أ» ألفًا وهمزةً منفصلة، فتُحذف الهمزة معه.
+    .replace(/[ً-ٰٕـ]/g, '') // تشكيل + تطويل
     .replace(/[أإآٱ]/g, 'ا')
     .replace(/ى/g, 'ي')
     .replace(/ؤ/g, 'و')
@@ -70,7 +75,12 @@ export function foldArabic(s: string): string {
     .trim();
 }
 
-export function parseQuickEntry(raw: string, categories: Category[]): ParsedEntry {
+export function parseQuickEntry(
+  raw: string,
+  categories: Category[],
+  /** خانات عملة المستخدم. بدونها يصير 1.5 دولارًا ١٥ دولارًا. */
+  minorUnits?: number,
+): ParsedEntry {
   const normalized = normalizeDigits(raw).replace(CURRENCY_NOISE, ' ');
   const { amount, without } = extractAmount(normalized);
   const label = without.replace(/[^\p{L}\p{N}\s'-]/gu, ' ').replace(/\s+/g, ' ').trim();
@@ -83,7 +93,7 @@ export function parseQuickEntry(raw: string, categories: Category[]): ParsedEntr
       const folded = foldArabic(kw);
       if (folded.length > 1 && haystack.includes(folded)) {
         return {
-          amount: amount === null ? null : toFils(amount),
+          amount: amount === null ? null : toFils(amount, minorUnits),
           label: label || kw,
           categoryId: cat.id,
           matchedBy: 'keyword',
@@ -97,12 +107,21 @@ export function parseQuickEntry(raw: string, categories: Category[]): ParsedEntr
   // فئة "المتبقي" (monthlyLimit === null) هي سلة المتنوع
   const fallback = active.find((c) => c.monthlyLimit === null);
   return {
-    amount: amount === null ? null : toFils(amount),
+    amount: amount === null ? null : toFils(amount, minorUnits),
     label,
     categoryId: fallback ? fallback.id : null,
     matchedBy: fallback ? 'fallback' : 'none',
     rawText: raw,
   };
+}
+
+/** أبرز كلمة في النص، أو null. أطول كلمة = الأكثر تمييزًا عادة ("ستاربكس" لا "من"). */
+export function keywordFrom(text: string): string | null {
+  const words = foldArabic(normalizeDigits(text))
+    .replace(/\d+(?:\.\d+)?/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 2);
+  return words.sort((a, b) => b.length - a.length)[0] ?? null;
 }
 
 /**
@@ -114,14 +133,8 @@ export function learnFromCorrection(
   rawText: string,
   chosenCategoryId: string,
 ): Category[] {
-  const words = foldArabic(normalizeDigits(rawText))
-    .replace(/\d+(?:\.\d+)?/g, ' ')
-    .split(/\s+/)
-    .filter((w) => w.length > 2);
-  if (words.length === 0) return categories;
-
-  // أطول كلمة = الأكثر تمييزًا عادة ("ستاربكس" لا "من")
-  const keyword = words.sort((a, b) => b.length - a.length)[0];
+  const keyword = keywordFrom(rawText);
+  if (!keyword) return categories;
 
   return categories.map((c) => {
     if (c.id !== chosenCategoryId) return c;

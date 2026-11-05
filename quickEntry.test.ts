@@ -6,7 +6,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseQuickEntry, learnFromCorrection, foldArabic } from './quickEntry';
+import { parseQuickEntry, learnFromCorrection, foldArabic, keywordFrom } from './quickEntry';
 import { Category } from './types';
 import { ICONS } from './templates';
 
@@ -113,4 +113,32 @@ test('التعلّم من التصحيح يضيف الكلمة ولا يكرّر
 test('بعد التعلّم يصنّف صح', () => {
   const learned = learnFromCorrection(cats, 'ستاربكس 2.5', 'dining');
   assert.equal(parseQuickEntry('ستاربكس 4', learned).categoryId, 'dining');
+});
+
+test('الخانات تتبع العملة: 1.5 دولار مئة وخمسون سنتًا', () => {
+  assert.equal(parseQuickEntry('قهوة 1.5', cats, 2).amount, 150);
+  assert.equal(parseQuickEntry('قهوة 1.5', cats, 3).amount, 1500);
+  assert.equal(parseQuickEntry('قهوة 1500', cats, 0).amount, 1500);
+});
+
+test('اسم العملة لا يتسرّب إلى اسم المصروف', () => {
+  assert.equal(parseQuickEntry('قهوة 3 دنانير', cats).label, 'قهوة');
+  assert.equal(parseQuickEntry('قهوة 3 د.ك', cats).label, 'قهوة');
+  // جزء من كلمة ليس عملة
+  assert.equal(parseQuickEntry('مدينار 3', cats).label, 'مدينار');
+});
+
+test('أبرز كلمة: لا أرقام ولا كلمات قصيرة', () => {
+  assert.equal(keywordFrom('من ستاربكس 3'), 'ستاربكس');
+  assert.equal(keywordFrom('12 من'), null);
+});
+
+test('الهمزة لا تُفرّق: أحذية واحذية كلمة واحدة', () => {
+  assert.equal(foldArabic('أمس'), 'امس');
+  assert.equal(foldArabic('إيجار'), 'ايجار');
+  assert.equal(foldArabic('آيس'), 'ايس');
+  assert.equal(foldArabic('مؤجر'), 'موجر');
+  assert.equal(foldArabic('جزئي'), 'جزيي');
+  const withHamza: Category[] = [{ ...cats[0], keywords: ['أحذية'] }];
+  assert.equal(parseQuickEntry('احذية 12', withHamza).matchedBy, 'keyword');
 });

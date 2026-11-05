@@ -1,24 +1,27 @@
+import { redirect } from 'next/navigation';
+
+import { isEmptyAccount } from '@shared/seedPayload';
 import type { AppState } from '@shared/types';
+
+import { isConfigured } from '@/lib/supabase/config';
+import { createClient } from '@/lib/supabase/server';
 
 import { SampleSource } from './sample';
 import type { DataSource } from './source';
+import { SupabaseSource } from './supabase-source';
 
 /**
- * **هنا تُضاف المصادقة، وهنا وحدها.**
+ * **هنا يُختار المصدر، وهنا وحده.**
  *
- * اليوم: مصدر العيّنة دائمًا، لأنّ سياسات RLS تُرجع صفر صفوف بلا
- * جلسة فيظهر التطبيق فارغًا ولا يمكن الحكم عليه.
+ * بجلسةٍ: بيانات المستخدم من Supabase. بلا جلسة: عيّنة، لأنّ سياسات
+ * RLS تُرجع صفر صفوف فيظهر التطبيق فارغًا ولا يُحكم عليه.
  *
- * بعد المصادقة يصير الجسم:
- *
- *   const supa = new SupabaseSource(await createServerClient());
- *   return (await supa.hasSession()) ? supa : new SampleSource();
- *
- * ولا شاشة واحدة تتغيّر: كلّها تستدعي `loadAppState()` وتأخذ
- * `AppState`. (`SupabaseSource` مكتوب ومنتظر في `supabase-source.ts`.)
+ * ولا شاشة واحدة تتغيّر: كلّها تستدعي `loadAppState()` وتأخذ `AppState`.
  */
 export async function getSource(): Promise<DataSource> {
-  return new SampleSource();
+  if (!isConfigured) return new SampleSource();
+  const supa = new SupabaseSource(await createClient());
+  return (await supa.hasSession()) ? supa : new SampleSource();
 }
 
 export async function loadAppState(): Promise<{
@@ -26,5 +29,10 @@ export async function loadAppState(): Promise<{
   isLive: boolean;
 }> {
   const source = await getSource();
-  return { state: await source.loadState(), isLive: source.isLive };
+  const state = await source.loadState();
+
+  // موضعٌ واحد تمرّ به كلّ الشاشات: حسابٌ بلا إعداد لا يرى لوحةً فارغة.
+  if (source.isLive && isEmptyAccount(state)) redirect('/setup');
+
+  return { state, isLive: source.isLive };
 }

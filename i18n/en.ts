@@ -28,6 +28,44 @@ export const en: Strings = {
     more: 'More',
   },
 
+  auth: {
+    signInTitle: 'Welcome back',
+    signInSubtitle: 'Sign in and your data follows you across devices.',
+    signUpTitle: 'Create account',
+    signUpSubtitle: 'One account keeps your budget on phone and desktop.',
+
+    email: 'Email',
+    emailPlaceholder: 'you@example.com',
+    password: 'Password',
+    passwordHint: 'At least eight characters.',
+    showPassword: 'Show password',
+    hidePassword: 'Hide password',
+
+    signIn: 'Sign in',
+    signUp: 'Create account',
+    signingIn: 'Signing in…',
+    signingUp: 'Creating…',
+    signOut: 'Sign out',
+
+    noAccount: 'No account?',
+    createOne: 'Create one',
+    haveAccount: 'Already have one?',
+    goSignIn: 'Sign in',
+
+    checkEmailTitle: 'Check your email',
+    checkEmail: 'We sent a confirmation link to {email}. Open it to finish signing up.',
+
+    errInvalid: 'That email or password is not right.',
+    errTaken: 'That email is already registered. Sign in instead.',
+    errWeak: 'Password too short — at least eight characters.',
+    errEmailFormat: 'That email address is not valid.',
+    errUnconfirmed: 'Your email is not confirmed yet. Open the link we sent you.',
+    errRate: 'Too many attempts. Wait a moment and try again.',
+    errNetwork: 'No connection. Check your network and try again.',
+    errGeneric: 'That did not go through. Try again.',
+    errConfig: 'Supabase keys are not configured on this machine.',
+  },
+
   common: {
     save: 'Save',
     cancel: 'Cancel',
@@ -87,6 +125,17 @@ export const en: Strings = {
     clear: 'Clear',
     backspace: 'Delete digit',
     savedIn: 'Logged in seconds',
+    smartLabel: 'Type what you spent',
+    smartPlaceholder: 'Lunch yesterday for three and a half',
+    understand: 'Understand',
+    understanding: 'One moment…',
+    suggested: 'Suggested',
+    partial: 'Could not understand all of it. Fill in the rest yourself.',
+    saving: 'Saving…',
+    saved: 'Expense recorded',
+    errAmount: 'Enter a valid amount above zero.',
+    errDate: 'That date is not valid.',
+    errSave: 'That could not be saved and nothing was recorded. Try again.',
   },
 
   receipts: {
@@ -336,6 +385,27 @@ export const en: Strings = {
     reviewEntries: 'Review entries',
   },
 
+  seed: {
+    cash: 'Cash',
+    card: 'Main card',
+    savings: 'Savings account',
+    food: 'Food and groceries',
+    cafe: 'Dining and coffee',
+    transport: 'Transport',
+    bills: 'Bills and rent',
+    shopping: 'Shopping',
+    health: 'Health',
+    kids: 'Kids and education',
+    fun: 'Entertainment',
+    other: 'Other',
+    rent: 'Rent',
+    utilities: 'Electricity and water',
+    phone: 'Internet and mobile',
+    emergency: 'Emergency fund',
+    primary: 'Main income',
+    allowance: 'Allowance',
+  },
+
   setup: {
     step: 'Step {n} of {total}',
     lastStep: 'Step {n} of {total} — last one',
@@ -391,6 +461,10 @@ export const en: Strings = {
     },
     finish: 'Done — open the app',
     skipIncome: 'Skip — just track spending',
+    payDay: 'Arrives on day',
+    saving: 'Setting up…',
+    errIncome: 'Enter the amount in digits, like 1250.500',
+    errSave: 'Setup could not be saved and nothing was written. Try again.',
   },
 
   empty: {
